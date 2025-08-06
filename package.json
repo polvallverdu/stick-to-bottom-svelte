@@ -1,6 +1,20 @@
 {
 	"name": "use-stick-to-bottom-svelte",
-	"version": "0.0.1",
+	"version": "1.0.0",
+	"author": {
+		"name": "Pol Vallverdu",
+		"email": "contact@polv.dev",
+		"url": "https://polv.dev"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/polvallverdu/stick-to-bottom-svelte"
+	},
+	"homepage": "https://polv.dev/stick-to-bottom-svelte",
+	"bugs": {
+		"url": "https://github.com/polvallverdu/stick-to-bottom-svelte/issues"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
@@ -10,9 +24,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint .",
-		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build"
+		"lint": "prettier --check . && eslint ."
 	},
 	"files": [
 		"dist",
@@ -35,14 +47,8 @@
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {
-		"@chromatic-com/storybook": "^4.1.0",
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
-		"@storybook/addon-a11y": "^9.1.1",
-		"@storybook/addon-docs": "^9.1.1",
-		"@storybook/addon-svelte-csf": "^5.0.7",
-		"@storybook/addon-vitest": "^9.1.1",
-		"@storybook/sveltekit": "^9.1.1",
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/package": "^2.0.0",
@@ -52,7 +58,6 @@
 		"@types/node": "^22",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
-		"eslint-plugin-storybook": "^9.1.1",
 		"eslint-plugin-svelte": "^3.0.0",
 		"globals": "^16.0.0",
 		"mdsvex": "^0.12.3",
@@ -60,7 +65,6 @@
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.6.11",
 		"publint": "^0.3.2",
-		"storybook": "^9.1.1",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
 		"tailwindcss": "^4.0.0",

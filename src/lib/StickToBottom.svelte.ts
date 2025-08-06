@@ -1,4 +1,10 @@
+/*!---------------------------------------------------------------------------------------------
+ *  Copyright (c) Pol, StackBlitz. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import { browser } from '$app/environment';
+import { createSubscriber } from 'svelte/reactivity';
 
 export interface StickToBottomAnimationState {
 	behavior: 'instant' | Required<SpringAnimation>;
@@ -20,8 +26,8 @@ export interface StickToBottomState {
 	velocity: number;
 	accumulated: number;
 
-	escapedFromLock: boolean;
-	isAtBottom: boolean;
+	escapedFromLockState: boolean;
+	isAtBottomState: boolean;
 	isNearBottom: boolean;
 
 	resizeObserver?: ResizeObserver;
@@ -131,13 +137,14 @@ if (browser) {
 	});
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isEqual(a: any, b: any) {
 	return JSON.stringify(a) === JSON.stringify(b);
 }
 
 export class StickToBottom {
-	private escapedFromLock = $state(false);
-	private isAtBottom = $state(false);
+	private escapedFromLockState = $state(false);
+	private isAtBottomState = $state(false);
 	private isNearBottomState = $state(false);
 	private lastCalculation: { targetScrollTop: number; calculatedScrollTop: number } | undefined;
 
@@ -150,8 +157,10 @@ export class StickToBottom {
 	private lastScrollTop = 0;
 	private resizeDifference = 0;
 
+	private subscribe = $state<() => void>();
+
 	constructor(private options: StickToBottomOptions) {
-		this.isAtBottom = options.initial !== false;
+		this.isAtBottomState = options.initial !== false;
 
 		$effect(() => {
 			const scrollRef = this.options.scrollElement();
@@ -159,6 +168,17 @@ export class StickToBottom {
 
 			scrollRef.addEventListener('wheel', this.handleScroll, { passive: true });
 			scrollRef.addEventListener('scroll', this.handleScroll, { passive: true });
+
+			this.subscribe = createSubscriber((update) => {
+				scrollRef.addEventListener('wheel', update, { passive: true });
+				scrollRef.addEventListener('scroll', update, { passive: true });
+
+				// stop listening when all the effects are destroyed
+				return () => {
+					scrollRef.removeEventListener('wheel', update);
+					scrollRef.removeEventListener('scroll', update);
+				};
+			});
 
 			return () => {
 				scrollRef.removeEventListener('wheel', this.handleScroll);
@@ -211,8 +231,8 @@ export class StickToBottom {
 					 * could have caused the container to be at the bottom.
 					 */
 					if (this.internal_isNearBottom) {
-						this.escapedFromLock = false;
-						this.isAtBottom = true;
+						this.escapedFromLockState = false;
+						this.isAtBottomState = true;
 					}
 				}
 
@@ -242,7 +262,7 @@ export class StickToBottom {
 		});
 	}
 
-	isSelecting = () => {
+	private isSelecting = () => {
 		if (!mouseDown) return false;
 
 		const selection = window.getSelection();
@@ -252,18 +272,30 @@ export class StickToBottom {
 
 		const scrollRef = this.options.scrollElement();
 
+		if (!scrollRef) return false;
+
 		return (
 			range.commonAncestorContainer.contains(scrollRef) ||
 			scrollRef?.contains(range.commonAncestorContainer)
 		);
 	};
 
+	get escapedFromLock() {
+		return this.escapedFromLockState;
+	}
+
+	get isAtBottom() {
+		return this.isAtBottomState;
+	}
+
 	get scrollTop() {
+		this.subscribe?.();
+
 		const scrollRef = this.options.scrollElement();
 		return scrollRef?.scrollTop ?? 0;
 	}
 
-	setScrollTop(scrollTop: number) {
+	private setScrollTop(scrollTop: number) {
 		const scrollRef = this.options.scrollElement();
 		if (!scrollRef) return;
 		scrollRef.scrollTop = scrollTop;
@@ -271,6 +303,8 @@ export class StickToBottom {
 	}
 
 	get targetScrollTop() {
+		this.subscribe?.();
+
 		const scrollRef = this.options.scrollElement();
 		const contentRef = this.options.contentElement();
 
@@ -281,7 +315,9 @@ export class StickToBottom {
 		return scrollRef.scrollHeight - 1 - scrollRef.clientHeight;
 	}
 
-	get calculatedTargetScrollTop() {
+	private get calculatedTargetScrollTop() {
+		this.subscribe?.();
+
 		const scrollRef = this.options.scrollElement();
 		const contentRef = this.options.contentElement();
 
@@ -320,10 +356,14 @@ export class StickToBottom {
 	}
 
 	get scrollDifference() {
+		this.subscribe?.();
+
 		return this.calculatedTargetScrollTop - this.scrollTop;
 	}
 
-	get internal_isNearBottom() {
+	private get internal_isNearBottom() {
+		this.subscribe?.();
+
 		return this.scrollDifference <= STICK_TO_BOTTOM_OFFSET_PX;
 	}
 
@@ -331,13 +371,19 @@ export class StickToBottom {
 		return this.isNearBottomState;
 	}
 
+	/**
+	 * Scroll to the bottom of the container. Also starts auto-scrolling again.
+	 *
+	 * @param scrollOptions - The options for the scroll.
+	 * @returns A promise that resolves to true if the scroll was successful, false otherwise.
+	 */
 	scrollToBottom = (scrollOptions: ScrollToBottomOptions): Promise<boolean> | boolean => {
 		if (typeof scrollOptions === 'string') {
 			scrollOptions = { animation: scrollOptions };
 		}
 
 		if (!scrollOptions.preserveScrollPosition) {
-			this.isAtBottom = true;
+			this.isAtBottomState = true;
 		}
 
 		const waitElapsed = Date.now() + (Number(scrollOptions.wait) || 0);
@@ -357,7 +403,7 @@ export class StickToBottom {
 
 		const next = async (): Promise<boolean> => {
 			const promise = new Promise(requestAnimationFrame).then(() => {
-				if (!this.isAtBottom) {
+				if (!this.isAtBottomState) {
 					this.animation = undefined;
 
 					return false;
@@ -422,10 +468,10 @@ export class StickToBottom {
 					});
 				}
 
-				return this.isAtBottom;
+				return this.isAtBottomState;
 			});
 
-			return promise.then((isAtBottom) => {
+			return promise.then((isAtBottomState) => {
 				requestAnimationFrame(() => {
 					if (!this.animation) {
 						this.lastTick = undefined;
@@ -433,7 +479,7 @@ export class StickToBottom {
 					}
 				});
 
-				return isAtBottom;
+				return isAtBottomState;
 			});
 		};
 
@@ -448,21 +494,23 @@ export class StickToBottom {
 		return next();
 	};
 
+	/**
+	 * Stop the auto-scrolling.
+	 */
 	stopScroll = () => {
-		this.escapedFromLock = true;
-		this.isAtBottom = false;
+		this.escapedFromLockState = true;
+		this.isAtBottomState = false;
 	};
 
-	handleScroll = ({ target }: Event) => {
+	private handleScroll = ({ target }: Event) => {
 		const scrollRef = target as HTMLElement;
 		if (target !== scrollRef) {
 			return;
 		}
 
-		this.lastScrollTop = this.scrollTop;
-		this.ignoreScrollToTop = undefined;
+		const scrollTop = this.scrollTop;
 
-		if (this.ignoreScrollToTop && this.ignoreScrollToTop > this.scrollTop) {
+		if (this.ignoreScrollToTop && this.ignoreScrollToTop > scrollTop) {
 			/**
 			 * When the user scrolls up while the animation plays, the `scrollTop` may
 			 * not come in separate events; if this happens, to make sure `isScrollingUp`
@@ -484,7 +532,8 @@ export class StickToBottom {
 			/**
 			 * When theres a resize difference ignore the resize event.
 			 */
-			if (this.resizeDifference || this.scrollTop === this.ignoreScrollToTop) {
+			if (this.resizeDifference || scrollTop === this.ignoreScrollToTop) {
+				this.ignoreScrollToTop = undefined;
 				return;
 			}
 
@@ -493,8 +542,10 @@ export class StickToBottom {
 				return;
 			}
 
-			const isScrollingDown = this.scrollTop > this.lastScrollTop;
-			const isScrollingUp = this.scrollTop < this.lastScrollTop;
+			const isScrollingDown = scrollTop > this.lastScrollTop;
+			const isScrollingUp = scrollTop < this.lastScrollTop;
+
+			this.lastScrollTop = scrollTop;
 
 			if (this.animation?.ignoreEscapes) {
 				this.setScrollTop(this.lastScrollTop);
@@ -506,16 +557,17 @@ export class StickToBottom {
 			}
 
 			if (isScrollingDown) {
-				this.escapedFromLock = false;
+				this.escapedFromLockState = false;
 			}
 
-			if (!this.escapedFromLock && this.internal_isNearBottom) {
-				this.isAtBottom = true;
+			if (!this.escapedFromLockState && this.internal_isNearBottom) {
+				this.isAtBottomState = true;
 			}
 		}, 1);
 	};
 }
 
+// eslint-disable-next-line svelte/prefer-svelte-reactivity
 const animationCache = new Map<string, Readonly<Required<SpringAnimation>>>();
 
 function mergeAnimations(...animations: (Animation | boolean | undefined)[]) {
