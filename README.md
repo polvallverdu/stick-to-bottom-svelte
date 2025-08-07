@@ -27,7 +27,7 @@ pnpm install stick-to-bottom-svelte
 
 ```svelte
 <script lang="ts">
-	import { StickToBottom } from 'use-stick-to-bottom-svelte';
+	import { StickToBottom } from 'stick-to-bottom-svelte';
 
 	let messages = $state([]);
 	let scrollElement = $state<HTMLElement>();
@@ -178,7 +178,7 @@ type Animation = 'instant' | SpringAnimation;
 
 ```svelte
 <script lang="ts">
-	import { StickToBottom } from 'use-stick-to-bottom-svelte';
+	import { StickToBottom } from 'stick-to-bottom-svelte';
 
 	let messages = $state([]);
 	let newMessage = $state('');
@@ -242,7 +242,7 @@ type Animation = 'instant' | SpringAnimation;
 
 ```svelte
 <script lang="ts">
-	import { StickToBottom } from 'use-stick-to-bottom-svelte';
+	import { StickToBottom } from 'stick-to-bottom-svelte';
 
 	let logs = $state([]);
 	let scrollElement = $state<HTMLElement>();

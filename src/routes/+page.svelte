@@ -157,7 +157,7 @@
 			<div class="overflow-x-auto rounded-lg bg-gray-900 p-6 text-sm text-gray-100">
 				<pre><code
 						>{`<script lang="ts">
-  import { StickToBottom } from 'use-stick-to-bottom-svelte';
+  import { StickToBottom } from 'stick-to-bottom-svelte';
   
   let messages = $state([]);
   let scrollElement = $state<HTMLElement>();
@@ -189,13 +189,13 @@
 
 			<div class="mt-6 text-center">
 				<a
-					href="https://www.npmjs.com/package/use-stick-to-bottom-svelte"
+					href="https://www.npmjs.com/package/stick-to-bottom-svelte"
 					class="inline-flex items-center font-medium text-blue-600 hover:text-blue-800"
 				>
 					<svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
 						<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 					</svg>
-					npm install use-stick-to-bottom-svelte
+					npm install stick-to-bottom-svelte
 				</a>
 			</div>
 		</div>
@@ -226,7 +226,7 @@
 				<div class="rounded-lg bg-gray-800 p-6">
 					<h3 class="mb-4 text-lg font-semibold">Quick Install</h3>
 					<code class="block rounded bg-gray-700 p-3 text-sm text-green-400">
-						npm install use-stick-to-bottom-svelte
+						npm install stick-to-bottom-svelte
 					</code>
 				</div>
 
