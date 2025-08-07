@@ -9,7 +9,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/polvallverdu/stick-to-bottom-svelte"
+		"url": "git+https://github.com/polvallverdu/stick-to-bottom-svelte.git"
 	},
 	"homepage": "https://polv.dev/stick-to-bottom-svelte",
 	"bugs": {
