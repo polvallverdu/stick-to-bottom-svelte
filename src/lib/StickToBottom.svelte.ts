@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { browser } from '$app/environment';
+const browser = typeof window !== 'undefined';
 import { createSubscriber } from 'svelte/reactivity';
 
 export interface StickToBottomAnimationState {
