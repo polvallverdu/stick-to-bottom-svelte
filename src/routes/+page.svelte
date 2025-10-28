@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Demo from '$lib/components/Demo.svelte';
+	import Demo from '../components/Demo.svelte';
 </script>
 
 <svelte:head>
