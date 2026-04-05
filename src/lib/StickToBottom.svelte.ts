@@ -285,7 +285,7 @@ export class StickToBottom {
 	}
 
 	get isAtBottom() {
-		return this.isAtBottomState;
+		return this.isAtBottomState || this.isNearBottomState;
 	}
 
 	get scrollTop() {
